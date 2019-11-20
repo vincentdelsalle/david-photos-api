@@ -1,61 +1,80 @@
-const Joi = require('@hapi/joi')
-
-// const photos = [
-//   {id: 1, place: 'argentine', month: 'mars', year: '2010', file_name: 'uploadFile-1525869322263.jpg', thumb_name: 'uploadFile-1525869322263_thumb.jpg', size: '930029', orientation: 'landscape', photo_name: 'P1030323.JPG', color: 'blue', rank: 1, createdAt: '2018-05-09 12:35:22', updatedAt: '2018-05-09 12:35:22', colorId: null},
-//   {id: 2, place: 'bolivie', month: 'juillet', year: '2017', file_name: 'uploadFile-1525869416321.jpg', thumb_name: 'uploadFile-1525869416321_thumb.jpg', size: '937952', orientation: 'portrait', photo_name: 'P1030501.JPG', color: 'green', rank: 2, createdAt: '2018-05-09 12:36:56', updatedAt: '2018-05-09 12:36:56', colorId: null}
-// ]
+const mongoose = require('mongoose')
+const { Photo, validate } = require('../models/photoModel')
+const { Color } = require('../models/colorModel')
 
 module.exports = {
-  findByColor: function (req, res) {
-    const currentColor = req.params.color
-    // pool.query(`SELECT c.* FROM photos AS p
-    //             INNER JOIN colors AS c ON p.colorId = c.colorId 
-    //             WHERE c.color_name = ?`, 
-    //             [currentColor], (error, photosByColor) => {
-    //   if (error) throw res.status(400).send(error.message)
-
-    //   if(!photosByColor.length) return res.status(404).send('No photos for that given color.')
-
-    //   res.send(photosByColor)
-    // })
+  getAllPhotos: async (req, res) => {
+    const photos = await Photo.find().sort({name: 1})
+    res.send(photos)
   },
-  postPhoto: (req, res) => {
-    const { error } = validatePhoto(req.body) 
-    if (error) return res.status(400).send(error.details[0].message)
-  
-    const photo = {
-	    // "photoId": 9,
-	    // "place": "New York",
-	    // "month": "mars",
-	    // "year": 2019,
-      // "file_name": "file-name-here.jpg",
-      // "thumb_name": "thumb-name-here.jpg",
-      // "size": "1930123",
-	    // "orientation": "portarit",
-	    // "photo_name": "photo-name.jpg",
-      // "rank": 1,
-      // "colorId": parseInt(req.body.colorId)
-}
-    // Add a new photo
-    photos.push(photo)
+  // getPhotosByColor: async (req, res) => {
+  //   const photos = await Photo.find({ "color.name": req.params.color })
+  //   if (!photos.length) return res.status(404).send('The Gallery with the given color was not found.')
+
+  //   res.send(photos)
+  // },
+  getPhotoById: async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send('Invalid Photo.')
+    
+    const photo = await Photo.findById(req.params.id)
+    if (!photo) return res.status(404).send('The Photo with the given ID was not found.')
+
     res.send(photo)
   },
-}
+  postPhoto: async (req, res) => {
+    const { error } = validate(req.body) 
+    if (error) return res.status(400).send(error.details[0].message)
 
-// fx validation photos inputs
-function validatePhoto(data) {
-  const today = new Date()
-  const schema = Joi.object({
-    place: Joi.string()
-              .min(2)
-              .max(30)
-              .pattern(/^([a-zéèêàùïôæœç()"-]+\s?)*\s*$/i, 'place name')
-              .required(),
-    year: Joi.number()
-             .integer()
-             .min(1900)
-             .max(today.getFullYear())
-             .required()
-  })
-  return schema.validate(data)
+    const color = await Color.findById(req.body.colorId)
+    if(!color) return res.status(400).send('Invalid Color.')
+  
+    const photo = new Photo({
+      place: req.body.place,
+      month: req.body.month,
+      year: req.body.year,
+      color: {
+        _id: color._id, 
+        name: color.name
+      }
+    })
+    
+    // Add a new photo
+    // try {
+      await photo.save()
+      res.send(photo)
+    // } catch (ex) {
+    //   let errorMessage = []
+    //   for (field in ex.errors) {
+    //     console.log(ex.errors[field].message)
+    //     errorMessage.push(ex.errors[field].message)
+    //   }
+    //   res.status(404).send(errorMessage)
+    // }
+  },
+  editPhoto: async (req, res) => {
+    const { error } = validate(req.body) 
+    if (error) return res.status(400).send(error.details[0].message)
+  
+    // something needsto be clarified here :
+    // the id is in the url as well as in the body
+    // if it's a correct id in the url (found in the DB), 
+    //            whatever is the id in the body (as long as it's a valid 
+    //            Objectid fomat) the phot with the id of the url will be modify
+    const photo = await Photo.findByIdAndUpdate(req.params.id, req.body, { 
+      new: true 
+    })
+    
+    if (!photo) return res.status(404).send('Invalid Photo.')
+
+    res.send(photo)
+  },
+  deletePhoto: async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send('Invalid Photo.')
+    
+    const photo = await Photo.findByIdAndRemove(req.params.id)
+
+    if (!photo) return res.status(404).send('The Photo with the given ID was not found.')
+
+    res.send(photo)
+  }
 }

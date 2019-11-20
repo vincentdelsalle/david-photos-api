@@ -1,41 +1,26 @@
-// const colors = [
-//   {id: 1, name: 'purple', hexacode: '#a3307d'},
-//   {id: 2, name: 'brown', hexacode: '#3e1d0c'},
-//   {id: 3, name: 'yellow', hexacode: '#e5c55e'},
-//   {id: 4, name: 'red', hexacode: '#dc0a0b'},
-//   {id: 5, name: 'black-white', hexacode: '#ebebeb'},
-//   {id: 6, name: 'black', hexacode: '#000000'},
-//   {id: 7, name: 'green', hexacode: '#267c3f'},
-//   {id: 8, name: 'grey', hexacode: '#6f787d'},
-//   {id: 9, name: 'blue', hexacode: '#0e104d'},
-//   {id: 10, name: 'white', hexacode: '#ebebeb'},
-// ]
+const { Color } = require('../models/colorModel')
 
 module.exports = {
-  findAll: (req, res) => {
-    // pool.query('SELECT * FROM colors', (error, colors) => {
-    //   if (error) throw res.status(400).send(error.message)
-
-    //   res.send(colors)
-    // })
-  },
-  findAllExceptCurrent: (req, res) => {
-    const currentColor = req.params.color;
-    const color = colors.find(c => c.name === currentColor)
-    if(!color) return res.status(404).send('Color not found.')
-
-    const index = colors.indexOf(color)
-    colors.splice(index, 1)
+  getAllColors: async (req, res) => {
+    const colors = await Color.find().sort({name: 1})
     res.send(colors)
   },
-  findHexacodeColor: (req, res) => {
-    const currentColor = req.params.color;
-    // pool.query('SELECT hexacode FROM colors WHERE name = ?', [currentColor], (error, hexacode) => {
-    //   if (error) throw res.status(400).send(error.message)
+  getAllColorsExceptCurrent: async (req, res) => {
+    const currentColor = await Color.findOne({ name: req.params.color })
+    if(!currentColor) return res.status(404).send('Color not found.')
+    
+    const colors = await Color
+      .find({ name: { $nin: req.params.color } })
+      .sort({ name: 1 })
+    
+      res.send(colors)
+  },
+  getHexacodeColor: async (req, res) => {
+    const hexacode = await Color
+      .findOne({ name: req.params.color })
+      .select('hexacode')
+    if(!hexacode) return res.status(404).send('Color not found.')
 
-    //   if(!hexacode.length) return res.status(404).send('Hexacode not found.')
-      
-    //   res.send(hexacode)
-    // })
+    res.send(hexacode)
   }
 }
