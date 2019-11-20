@@ -1,3 +1,5 @@
+const auth = require('../middleware/auth')
+const admin = require('../middleware/admin')
 const express = require('express')
 const router = express.Router()
 const photoCtrl = require('../controllers/photosController')
@@ -9,10 +11,10 @@ router.get('/', photoCtrl.getAllPhotos)
 // Getting 1 photo by id
 router.get('/:id', photoCtrl.getPhotoById)
 // Post a photo
-router.post('/', photoCtrl.postPhoto)
+router.post('/', [auth, admin], photoCtrl.postPhoto)
 // Edit a photo
-router.put('/:id', photoCtrl.editPhoto)
+router.put('/:id', [auth, admin], photoCtrl.editPhoto)
 // Delete a photo
-router.delete('/:id', photoCtrl.deletePhoto)
+router.delete('/:id', [auth, admin], photoCtrl.deletePhoto)
 
 module.exports = router
