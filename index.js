@@ -14,7 +14,11 @@ if (!process.env.davidApi_jwtPrivateKey) {
   process.exit(1)
 }
 
-mongoose.connect(`mongodb://${process.env.DB_HOST}/${process.env.DB_DATABASE}`)
+mongoose.connect(`mongodb://${process.env.DB_HOST}/${process.env.DB_DATABASE}`, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true
+})
   .then(() => console.log('Connected to MongoDB...'))
   .catch(err => console.error('Could not connect to MongoDB...', err))
 
