@@ -1,4 +1,7 @@
+const logger = require('../helpers/logger')
+
 module.exports = function(err, req, res, next) {
-  //log the exception
+  logger.error(new Error(err))
+  
   res.status(500).send('Something failed.')
 }
