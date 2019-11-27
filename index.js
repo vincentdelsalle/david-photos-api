@@ -1,19 +1,13 @@
-const Joi = require('@hapi/joi')
-Joi.objectId = require('joi-objectid')(Joi)
 require('dotenv').config()
+const logger = require('./startup/logging')
 const express = require('express')
 const app = express()
 
 require('./startup/logging')
 require('./startup/routes')(app)
 require('./startup/db')()
-
-
-if (!process.env.davidApi_jwtPrivateKey) {
-  console.error('FATAL ERROR: davidApi_jwtPrivateKey is not defined.')
-  process.exit(1)
-}
-
+require('./startup/config')()
+require('./startup/validation')()
 
 const port = process.env.PORT
-app.listen(port, () => console.log(`listening on port ${port}...`))
+app.listen(port, () => logger.info(`listening on port ${port}...`))

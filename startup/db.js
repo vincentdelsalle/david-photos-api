@@ -1,4 +1,4 @@
-const winston = require('winston')
+const logger = require('../startup/logging')
 const mongoose = require('mongoose')
 const dbConfig = require('../dbConfig')
 
@@ -8,5 +8,5 @@ module.exports = function() {
   useUnifiedTopology: true,
   useCreateIndex: true
 })
-  .then(() => winston.info('Connected to MongoDB...'))
+  .then(() => logger.info('Connected to MongoDB...'))
 }
