@@ -1,6 +1,7 @@
 const { createLogger, format, level, transports } = require('winston')
 const { errors, combine, timestamp , metadata, json, colorize, simple } = format
 require('winston-mongodb')
+require('express-async-errors');
 require('dotenv').config()
 const dbConfig = require('../dbConfig')
 
@@ -16,8 +17,7 @@ const logger = createLogger({
   ),
   transports: [
     new transports.File({ 
-      filename: 'logs/errors.log',
-      level: 'error' 
+      filename: 'logs/errors.log'
     }),
    ],
   exceptionHandlers: [
