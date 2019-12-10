@@ -3,10 +3,11 @@ const mongoose = require('mongoose')
 const dbConfig = require('../dbConfig')
 
 module.exports = function() {
-  mongoose.connect(`mongodb://${dbConfig.host}:27017/${dbConfig.database}`, {
+  const db = dbConfig.database
+  mongoose.connect(`mongodb://${dbConfig.host}:27017/${db}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true
 })
-  .then(() => logger.info('Connected to MongoDB...'))
+  .then(() => logger.info(`Connected to ${db}...`))
 }

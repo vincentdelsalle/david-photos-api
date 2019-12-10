@@ -1,7 +1,7 @@
 const { createLogger, format, transports } = require('winston')
 const { errors, combine, timestamp , metadata, json, colorize, simple } = format
 require('winston-mongodb')
-require('express-async-errors');
+require('express-async-errors')
 const dbConfig = require('../dbConfig')
 
 const logger = createLogger({

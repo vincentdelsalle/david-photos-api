@@ -1,4 +1,3 @@
-require('dotenv').config()
 const logger = require('./startup/logging')
 const express = require('express')
 const app = express()
