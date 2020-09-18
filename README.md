@@ -1,6 +1,6 @@
-# David-photos API
+# David-photo API
 
-API for david-photos.org
+API for david-photo.org
 
 Based on:
 
